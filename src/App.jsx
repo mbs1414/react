@@ -13,20 +13,15 @@ import {
   createContact,
   deleteContact,
 } from './services/contactServices';
+import { ContactContext } from './context/contactContext';
 const App = () => {
   const naigate = useNavigate();
-  const [forceRender, setForceRender] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [getContacts, setContacts] = useState([]);
-  const [getContact, setContact] = useState({
-    fullName: '',
-    photo: '',
-    mobile: '',
-    email: '',
-    job: '',
-    group: '',
-  });
-  const [getGroups, setGroups] = useState([]);
+  const [contacts, setContacts] = useState([]);
+  const [contact, setContact] = useState({});
+  const [groups, setGroups] = useState([]);
+  const [contactQuery, setContactQuery] = useState({ text: '' });
+  const [filteredContacts, setFilteredContacts] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,9 +30,9 @@ const App = () => {
         const { data: contactsData } = await getAllContacts();
         const { data: groupsData } = await getAllGroups();
         setContacts(contactsData);
+        setFilteredContacts(contactsData);
         setGroups(groupsData);
         setLoading(false);
-        console.log(contactsData);
       } catch (error) {
         console.log(error.message);
         setLoading(false);
@@ -46,33 +41,16 @@ const App = () => {
 
     fetchData();
   }, []);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const { data: contactsData } = await getAllContacts();
-        setContacts(contactsData);
-        setFilteredContacts(contactsData);
-        setLoading(false);
-      } catch (error) {
-        console.log(error.message);
-        setLoading(false);
-      }
-    };
 
-    fetchData();
-  }, [forceRender]);
-
-  const setContactInfo = (event) => {
-    setContact({ ...getContact, [event.target.name]: event.target.value });
+  const onContactChange = (event) => {
+    setContact({ ...contact, [event.target.name]: event.target.value });
   };
   const createContactForm = async (event) => {
     event.preventDefault();
     try {
-      const { status } = await createContact(getContact);
+      const { status } = await createContact(contact);
       if (status === 201) {
         setContact({});
-        setForceRender(!forceRender);
         naigate('/contacts');
       }
     } catch (error) {
@@ -93,56 +71,60 @@ const App = () => {
       setLoading(false);
     }
   };
-  const [query, setQuery] = useState({ text: '' });
-  const [getFilteredContacts, setFilteredContacts] = useState([]);
   const contactSearch = (event) => {
-    setQuery({ ...query, text: event.target.value });
-    const allContacts = getContacts.filter(
-      (c) =>
-        typeof c.fullName === 'string' &&
-        c.fullName.toLowerCase().includes(event.target.value.toLowerCase())
+    setContactQuery({ ...contactQuery, text: event.target.value });
+    const allContacts = contacts.filter((c) =>
+      c.fullName.toLowerCase().includes(event.target.value.toLowerCase())
     );
     setFilteredContacts(allContacts);
   };
   return (
-    <div className="App">
-      <NavBar query={query} search={contactSearch} />
-      <Routes>
-        <Route path="/" element={<Navigate to="/contacts" />} />
-        <Route
-          path="/contacts"
-          element={
-            <Contacts
-              getContacts={getFilteredContacts}
-              loading={loading}
-              removeContact={removeContact}
-            />
-          }
-        />
-        <Route
-          path="/contacts/add"
-          element={
-            <AddContact
-              loading={loading}
-              setContactInfo={setContactInfo}
-              contact={getContact}
-              groups={getGroups}
-              createContactForm={createContactForm}
-            />
-          }
-        />
-        <Route path="/contacts/:contactId" element={<ViewContact />} />
-        <Route
-          path="/contacts/edit/:contactId"
-          element={
-            <EditContact
-              forceRender={forceRender}
-              setForceRender={setForceRender}
-            />
-          }
-        />
-      </Routes>
-    </div>
+    <ContactContext.Provider
+      value={{
+        loading,
+        setLoading,
+        contact,
+        setContact,
+        contactQuery,
+        contacts,
+        filteredContacts,
+        groups,
+        onContactChange,
+        createContact: createContactForm,
+        contactSearch,
+      }}
+    >
+      <div className="App">
+        <NavBar />
+        <Routes>
+          <Route path="/" element={<Navigate to="/contacts" />} />
+          <Route
+            path="/contacts"
+            element={
+              <Contacts
+                getContacts={filteredContacts}
+                loading={loading}
+                removeContact={removeContact}
+              />
+            }
+          />
+          <Route
+            path="/contacts/add"
+            element={
+              <AddContact
+                loading={loading}
+                setContactInfo={onContactChange}
+                contact={contact}
+                groups={groups}
+                createContactForm={createContactForm}
+              />
+            }
+          />
+          <Route path="/contacts/:contactId" element={<ViewContact />} />
+          <Route path="/contacts/edit/:contactId" element={<EditContact />} />
+        </Routes>
+      </div>
+    </ContactContext.Provider>
   );
 };
 export default App;

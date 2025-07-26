@@ -1,7 +1,10 @@
+import { useContext } from 'react';
 import { PURPLE } from '../../helpers/colors';
+import { ContactContext } from '../../context/contactContext';
 
-const SearchContact = ({query,search}) => {
-  
+const SearchContact = () => {
+  const { contactQuery, contactSearch } = useContext(ContactContext);
+
   return (
     <div className="input-group mx-2 w-75" dir="ltr">
       <span
@@ -17,9 +20,9 @@ const SearchContact = ({query,search}) => {
         placeholder="جستجوی مخاطب"
         aria-label="Search"
         aria-describedby="basic-addon1"
-        dir='rtl'
-        value={query.text}
-        onChange={search}
+        dir="rtl"
+        value={contactQuery.text}
+        onChange={contactSearch}
       />
     </div>
   );
