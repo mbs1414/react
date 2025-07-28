@@ -48,26 +48,38 @@ const App = () => {
   const createContactForm = async (event) => {
     event.preventDefault();
     try {
-      const { status } = await createContact(contact);
+      setLoading((prevLoading) => !prevLoading);
+      const { status, data } = await createContact(contact);
       if (status === 201) {
+        const allContacts = [...contacts, data];
+        setContacts(allContacts);
+        setFilteredContacts(allContacts);
         setContact({});
+        setLoading((prevLoading) => !prevLoading);
         naigate('/contacts');
       }
     } catch (error) {
       console.log(error.message);
+      setLoading((prevLoading) => !prevLoading);
     }
   };
   const removeContact = async (contactId) => {
+    const allContacts = [...contacts];
     try {
       setLoading(true);
-      const response = await deleteContact(contactId);
-      if (response) {
-        const { data: contactsData } = await getAllContacts();
-        setContacts(contactsData);
+      const updatedContacts = contacts.filter((c) => c.id !== contactId);
+      setContacts(updatedContacts);
+      setFilteredContacts(updatedContacts);
+      const { status } = await deleteContact(contactId);
+      setLoading(false)
+      if (status !== 200) {
+        setContacts(allContacts);
         setLoading(false);
       }
     } catch (error) {
       console.log(error.message);
+      setContacts(allContacts);
+      setFilteredContacts(allContacts)
       setLoading(false);
     }
   };
@@ -92,6 +104,8 @@ const App = () => {
         onContactChange,
         createContact: createContactForm,
         contactSearch,
+        setContacts,
+        setFilteredContacts,
       }}
     >
       <div className="App">
@@ -100,26 +114,9 @@ const App = () => {
           <Route path="/" element={<Navigate to="/contacts" />} />
           <Route
             path="/contacts"
-            element={
-              <Contacts
-                getContacts={filteredContacts}
-                loading={loading}
-                removeContact={removeContact}
-              />
-            }
+            element={<Contacts removeContact={removeContact} />}
           />
-          <Route
-            path="/contacts/add"
-            element={
-              <AddContact
-                loading={loading}
-                setContactInfo={onContactChange}
-                contact={contact}
-                groups={groups}
-                createContactForm={createContactForm}
-              />
-            }
-          />
+          <Route path="/contacts/add" element={<AddContact />} />
           <Route path="/contacts/:contactId" element={<ViewContact />} />
           <Route path="/contacts/edit/:contactId" element={<EditContact />} />
         </Routes>

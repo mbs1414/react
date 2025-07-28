@@ -1,79 +1,77 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import {
-  getContact,
-  getAllGroups,
-  updateContact,
-} from '../../services/contactServices';
+import { getContact, updateContact } from '../../services/contactServices';
 import { Spinner } from '../';
 import { COMMENT, ORANGE, PURPLE } from '../../helpers/colors';
 import note from '../../assets../../assets/man-taking-note.png';
+import { ContactContext } from '../../context/contactContext';
 
-const EditContact = ({ forceRender, setForceRender }) => {
+const EditContact = () => {
   const { contactId } = useParams();
   const navigate = useNavigate();
 
-  const [state, setState] = useState({
-    loading: false,
-    contact: {
-      fullName: '',
-      photo: '',
-      mobile: '',
-      email: '',
-      job: '',
-      group: '',
-    },
-    groups: [],
+  const [contact, setContact] = useState({
+    fullName: '',
+    photo: '',
+    mobile: '',
+    email: '',
+    job: '',
+    group: '',
   });
+  const {
+    loading,
+    setLoading,
+    groups,
+    contacts,
+    setContacts,
+    setFilteredContacts,
+  } = useContext(ContactContext);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setState({ ...state, loading: true });
+        setLoading(true);
         const { data: contactData } = await getContact(contactId);
-        const { data: groupsData } = await getAllGroups();
-        setState({
-          ...state,
-          loading: false,
-          contact: contactData,
-          groups: groupsData,
-        });
+        setLoading(false);
+        setContact(contactData);
       } catch (error) {
         console.log(error);
-        setState({ ...state, loading: false });
+        setLoading(false);
       }
     };
 
     fetchData();
   }, []);
 
-  const setContactInfo = (event) => {
-    setState({
-      ...state,
-      contact: {
-        ...state.contact,
-        [event.target.name]: event.target.value,
-      },
+  const onContactChange = (event) => {
+    setContact({
+      ...contact,
+      [event.target.name]: event.target.value,
     });
   };
 
   const submitForm = async (event) => {
     event.preventDefault();
     try {
-      setState({ ...state, loading: true });
-      const { data } = await updateContact(state.contact, contactId);
-      setState({ ...state, loading: false });
-      if (data) {
-        setForceRender(!forceRender);
+      setLoading(true);
+      const { data, status } = await updateContact(contact, contactId);
+      if (status === 200) {
+        setLoading(false);
+        const allContacts = [...contacts];
+        const contactIndex = allContacts.findIndex(
+          (c) => String(c.id) === String(contactId)
+        );
+        allContacts[contactIndex] = { ...data };
+        setContacts(allContacts);
+        setFilteredContacts(allContacts);
+
         navigate('/contacts');
       }
     } catch (err) {
       console.log(err);
-      setState({ ...state, loading: false });
+      setLoading(false);
     }
   };
-
-  const { loading, contact, groups } = state;
 
   return (
     <>
@@ -103,7 +101,7 @@ const EditContact = ({ forceRender, setForceRender }) => {
                         type="text"
                         className="form-control"
                         value={contact.fullName}
-                        onChange={setContactInfo}
+                        onChange={onContactChange}
                         required={true}
                         placeholder="نام و نام خانوادگی"
                       />
@@ -113,7 +111,7 @@ const EditContact = ({ forceRender, setForceRender }) => {
                         name="photo"
                         type="text"
                         value={contact.photo}
-                        onChange={setContactInfo}
+                        onChange={onContactChange}
                         className="form-control"
                         required={true}
                         placeholder="آدرس تصویر"
@@ -125,7 +123,7 @@ const EditContact = ({ forceRender, setForceRender }) => {
                         type="number"
                         className="form-control"
                         value={contact.mobile}
-                        onChange={setContactInfo}
+                        onChange={onContactChange}
                         required={true}
                         placeholder="شماره موبایل"
                       />
@@ -136,7 +134,7 @@ const EditContact = ({ forceRender, setForceRender }) => {
                         type="email"
                         className="form-control"
                         value={contact.email}
-                        onChange={setContactInfo}
+                        onChange={onContactChange}
                         required={true}
                         placeholder="آدرس ایمیل"
                       />
@@ -147,7 +145,7 @@ const EditContact = ({ forceRender, setForceRender }) => {
                         type="text"
                         className="form-control"
                         value={contact.job}
-                        onChange={setContactInfo}
+                        onChange={onContactChange}
                         required={true}
                         placeholder="شغل"
                       />
@@ -156,7 +154,7 @@ const EditContact = ({ forceRender, setForceRender }) => {
                       <select
                         name="group"
                         value={contact.group}
-                        onChange={setContactInfo}
+                        onChange={onContactChange}
                         required={true}
                         className="form-control"
                       >

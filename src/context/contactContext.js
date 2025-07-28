@@ -1,4 +1,4 @@
-import { createContext } from "react";
+import { createContext } from 'react';
 export const ContactContext = createContext({
   loading: false,
   setLoading: () => {},
@@ -13,4 +13,6 @@ export const ContactContext = createContext({
   updateContact: () => {},
   createContact: () => {},
   contactSearch: () => {},
+  setContacts: () => {},
+  setFilteredContacts: () => {},
 });

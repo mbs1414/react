@@ -52,8 +52,9 @@ const Contact = ({ contact, removeContact }) => {
               <button
                 className="btn my-1"
                 style={{ backgroundColor: RED }}
-                data-bs-toggle="modal"
-                data-bs-target={`#remove-${contact.id}`}
+                onClick={() => {
+                  removeContact(contact.id);
+                }}
               >
                 <i className="fa fa-trash"></i>
               </button>
@@ -86,9 +87,6 @@ const Contact = ({ contact, removeContact }) => {
                     type="button"
                     className="btn btn-danger"
                     data-bs-dismiss="modal"
-                    onClick={() => {
-                      removeContact(contact.id);
-                    }}
                   >
                     خیر
                   </button>

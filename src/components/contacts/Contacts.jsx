@@ -1,11 +1,13 @@
-import { Fragment } from 'react';
+import { Fragment, useContext } from 'react';
 import { CURRENTLINE, ORANGE, PINK } from '../../helpers/colors';
 import Contact from './Contact';
 import notFound from './../../assets/no-found.gif';
 import Spinner from '../Spinner';
 import { Link } from 'react-router-dom';
+import { ContactContext } from '../../context/contactContext';
 
-const Contacts = ({ getContacts, loading, removeContact }) => {
+const Contacts = ({removeContact}) => {
+  const { filteredContacts, loading } = useContext(ContactContext);
   return (
     <Fragment>
       <section className="container mt-4">
@@ -33,8 +35,8 @@ const Contacts = ({ getContacts, loading, removeContact }) => {
         ) : (
           <div className="row">
             {/* Contact */}
-            {getContacts.length > 0 ? (
-              getContacts.map((contact) => (
+            {filteredContacts.length > 0 ? (
+              filteredContacts.map((contact) => (
                 <Contact
                   contact={contact}
                   key={contact.id}
