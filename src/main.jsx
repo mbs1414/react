@@ -7,6 +7,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'font-awesome/css/font-awesome.min.css';
 import { BrowserRouter } from 'react-router-dom';
 import SmartCounter from './practice/SmartCounter ';
+import Hooks from './components/hooks/Hooks';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

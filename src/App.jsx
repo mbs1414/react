@@ -20,7 +20,6 @@ const App = () => {
   const [contacts, setContacts] = useState([]);
   const [contact, setContact] = useState({});
   const [groups, setGroups] = useState([]);
-  const [contactQuery, setContactQuery] = useState({ text: '' });
   const [filteredContacts, setFilteredContacts] = useState([]);
 
   useEffect(() => {
@@ -71,7 +70,7 @@ const App = () => {
       setContacts(updatedContacts);
       setFilteredContacts(updatedContacts);
       const { status } = await deleteContact(contactId);
-      setLoading(false)
+      setLoading(false);
       if (status !== 200) {
         setContacts(allContacts);
         setLoading(false);
@@ -79,16 +78,21 @@ const App = () => {
     } catch (error) {
       console.log(error.message);
       setContacts(allContacts);
-      setFilteredContacts(allContacts)
+      setFilteredContacts(allContacts);
       setLoading(false);
     }
   };
-  const contactSearch = (event) => {
-    setContactQuery({ ...contactQuery, text: event.target.value });
-    const allContacts = contacts.filter((c) =>
-      c.fullName.toLowerCase().includes(event.target.value.toLowerCase())
-    );
-    setFilteredContacts(allContacts);
+  let filterTimeOut;
+  const contactSearch = (query) => {
+    if(!query) return setFilteredContacts([...contacts])
+    clearTimeout(filterTimeOut)
+    filterTimeOut = setTimeout(() => {
+      setFilteredContacts(
+        contacts.filter((c) =>
+          c.fullName.toLowerCase().includes(query.toLowerCase())
+        )
+      );
+    }, 1000);
   };
   return (
     <ContactContext.Provider
@@ -97,7 +101,6 @@ const App = () => {
         setLoading,
         contact,
         setContact,
-        contactQuery,
         contacts,
         filteredContacts,
         groups,
