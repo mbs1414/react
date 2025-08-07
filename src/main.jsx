@@ -13,7 +13,7 @@ import RealCounter from './practice/RealCounter';
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <RealCounter />
+      <App />
     </BrowserRouter>
   </StrictMode>
 );

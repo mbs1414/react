@@ -6,7 +6,7 @@ import { useContext } from 'react';
 import { ContactContext } from '../../context/contactContext';
 
 const AddContact = () => {
-  const { loading, onContactChange, contact, groups, createContact } =
+  const { loading, onContactChange, contact, groups, createContact, errors } =
     useContext(ContactContext);
   return (
     <>
@@ -40,6 +40,9 @@ const AddContact = () => {
               <hr style={{ backgroundColor: GREEN }} />
               <div className="row mt-5">
                 <div className="col-md-4">
+                  {errors?.map((error,index)=>(
+                    <p key={index} className="text-danger">{error.message}</p>
+                  ))}
                   <form onSubmit={createContact}>
                     <div className="mb-2">
                       <input

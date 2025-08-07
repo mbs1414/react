@@ -14,6 +14,8 @@ import {
   deleteContact,
 } from './services/contactServices';
 import { ContactContext } from './context/contactContext';
+import _ from 'lodash';
+import {contactSchema} from './validations/contactValidation'
 const App = () => {
   const naigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -21,6 +23,7 @@ const App = () => {
   const [contact, setContact] = useState({});
   const [groups, setGroups] = useState([]);
   const [filteredContacts, setFilteredContacts] = useState([]);
+  const [errors, setErrors] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,17 +51,20 @@ const App = () => {
     event.preventDefault();
     try {
       setLoading((prevLoading) => !prevLoading);
+      await contactSchema.validate(contact, { abortEarly: false });
       const { status, data } = await createContact(contact);
       if (status === 201) {
         const allContacts = [...contacts, data];
         setContacts(allContacts);
         setFilteredContacts(allContacts);
         setContact({});
+        setErrors([]);
         setLoading((prevLoading) => !prevLoading);
         naigate('/contacts');
       }
     } catch (error) {
       console.log(error.message);
+      setErrors(error.inner);     
       setLoading((prevLoading) => !prevLoading);
     }
   };
@@ -82,18 +88,14 @@ const App = () => {
       setLoading(false);
     }
   };
-  let filterTimeOut;
-  const contactSearch = (query) => {
-    if(!query) return setFilteredContacts([...contacts])
-    clearTimeout(filterTimeOut)
-    filterTimeOut = setTimeout(() => {
-      setFilteredContacts(
-        contacts.filter((c) =>
-          c.fullName.toLowerCase().includes(query.toLowerCase())
-        )
-      );
-    }, 1000);
-  };
+  const contactSearch = _.debounce((query) => {
+    if (!query) return setFilteredContacts([...contacts]);
+    setFilteredContacts(
+      contacts.filter((c) =>
+        c.fullName.toLowerCase().includes(query.toLowerCase())
+      )
+    );
+  }, 1000);
   return (
     <ContactContext.Provider
       value={{
@@ -109,6 +111,7 @@ const App = () => {
         contactSearch,
         setContacts,
         setFilteredContacts,
+        errors
       }}
     >
       <div className="App">
