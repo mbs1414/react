@@ -9,6 +9,7 @@ import { BrowserRouter } from 'react-router-dom';
 import SmartCounter from './practice/SmartCounter ';
 import Hooks from './components/hooks/Hooks';
 import RealCounter from './practice/RealCounter';
+import "react-toastify/ReactToastify.css"
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

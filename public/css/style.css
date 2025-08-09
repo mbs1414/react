@@ -17,6 +17,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Remove spinner (up/down arrows) from number inputs in all browsers */
+
+/* Chrome, Safari, Edge, Opera: hide spin buttons */
+
 input[type='text']::-webkit-input-placeholder,
 input[type='email']::-webkit-input-placeholder,
 input[type='number']::-webkit-input-placeholder {
@@ -35,4 +39,29 @@ input[type='number'] {
   background-color: #44475a !important;
   color: #f8f8f4 !important;
   border-color: #bd93f9 !important;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Autofill fix for Chrome, Safari, Edge */
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #44475a inset !important;
+  box-shadow: 0 0 0 1000px #44475a inset !important;
+  -webkit-text-fill-color: #f8f8f4 !important;
+  color: #f8f8f4 !important;
+  border-color: #bd93f9 !important;
+  transition: background-color 5000s ease-in-out 0s;
 }

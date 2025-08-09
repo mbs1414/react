@@ -6,7 +6,7 @@ import {
   NavBar,
   ViewContact,
 } from './components/index';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   getAllContacts,
   getAllGroups,
@@ -15,15 +15,15 @@ import {
 } from './services/contactServices';
 import { ContactContext } from './context/contactContext';
 import _ from 'lodash';
-import {contactSchema} from './validations/contactValidation'
+import { useImmer } from 'use-immer';
+import { ToastContainer, toast } from 'react-toastify';
+
 const App = () => {
   const naigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [contacts, setContacts] = useState([]);
-  const [contact, setContact] = useState({});
-  const [groups, setGroups] = useState([]);
-  const [filteredContacts, setFilteredContacts] = useState([]);
-  const [errors, setErrors] = useState([]);
+  const [loading, setLoading] = useImmer(false);
+  const [contacts, setContacts] = useImmer([]);
+  const [groups, setGroups] = useImmer([]);
+  const [filteredContacts, setFilteredContacts] = useImmer([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,47 +44,44 @@ const App = () => {
     fetchData();
   }, []);
 
-  const onContactChange = (event) => {
-    setContact({ ...contact, [event.target.name]: event.target.value });
-  };
-  const createContactForm = async (event) => {
-    event.preventDefault();
+  const createContactForm = async (values) => {
     try {
       setLoading((prevLoading) => !prevLoading);
-      await contactSchema.validate(contact, { abortEarly: false });
-      const { status, data } = await createContact(contact);
+      // await contactSchema.validate(contact, { abortEarly: false });
+      const { status, data } = await createContact(values);
       if (status === 201) {
-        const allContacts = [...contacts, data];
-        setContacts(allContacts);
-        setFilteredContacts(allContacts);
-        setContact({});
-        setErrors([]);
-        setLoading((prevLoading) => !prevLoading);
+        toast.success('مخاطب با موفقیت ساخته شد', { icon: '🚀' });
+        setFilteredContacts((draft) => {
+          draft.push(data);
+        });
+        setContacts((draft) => {
+          draft.push(data);
+        });
+        setLoading((draft) => !draft);
         naigate('/contacts');
       }
     } catch (error) {
       console.log(error.message);
-      setErrors(error.inner);     
       setLoading((prevLoading) => !prevLoading);
     }
   };
   const removeContact = async (contactId) => {
-    const allContacts = [...contacts];
+    const contactsBackup = [...contacts];
     try {
       setLoading(true);
-      const updatedContacts = contacts.filter((c) => c.id !== contactId);
-      setContacts(updatedContacts);
-      setFilteredContacts(updatedContacts);
+      setContacts((draft) => draft.filter((c) => c.id !== contactId));
+      setFilteredContacts((draft) => draft.filter((c) => c.id !== contactId));
       const { status } = await deleteContact(contactId);
       setLoading(false);
+      toast.error('مخاطب با موفقیت حذف شد',{icon: '🗑️'})
       if (status !== 200) {
-        setContacts(allContacts);
+        setContacts(contactsBackup);
         setLoading(false);
       }
     } catch (error) {
       console.log(error.message);
-      setContacts(allContacts);
-      setFilteredContacts(allContacts);
+      setContacts(contactsBackup);
+      setFilteredContacts(contactsBackup);
       setLoading(false);
     }
   };
@@ -101,20 +98,23 @@ const App = () => {
       value={{
         loading,
         setLoading,
-        contact,
-        setContact,
         contacts,
         filteredContacts,
         groups,
-        onContactChange,
         createContact: createContactForm,
         contactSearch,
         setContacts,
         setFilteredContacts,
-        errors
+        // errors
       }}
     >
       <div className="App">
+        <ToastContainer
+          rtl={true}
+          position="top-right"
+          theme="colored"
+          style={{ fontFamily: 'Vazir, Tahoma, Ubuntu', fontWeight: 'normal' }}
+        />
         <NavBar />
         <Routes>
           <Route path="/" element={<Navigate to="/contacts" />} />
