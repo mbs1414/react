@@ -1,0 +1,23 @@
+const names = [
+  'Alice',
+  'Bob',
+  'Charlie',
+  'Diana',
+  'Ethan',
+  'Fiona',
+  'George',
+  'Hannah',
+  'Ivan',
+  'Julia',
+  'Kevin',
+  'Lily',
+  'Mike',
+  'Nina',
+  'Oscar',
+  'Paula',
+  'Quinn',
+  'Ryan',
+  'Sophie',
+  'Tom',
+];
+export default names

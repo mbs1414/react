@@ -1,6 +1,7 @@
 import SearchContact from './contacts/SearchContact';
 import { BACKGROUND, PURPLE } from '../helpers/colors';
 import { useLocation } from 'react-router-dom';
+import {BsFillFlagFill} from "react-icons/bs"
 
 const Navbar = () => {
   const location = useLocation();
@@ -16,6 +17,7 @@ const Navbar = () => {
               <i className="fa fa-id-badge" style={{ color: PURPLE }} /> وب
               اپلیکیشن مدیریت{'  '}
               <span style={{ color: PURPLE }}>مخاطبین</span>
+              <BsFillFlagFill />
             </div>
           </div>
           {location.pathname === '/contacts' ? (
